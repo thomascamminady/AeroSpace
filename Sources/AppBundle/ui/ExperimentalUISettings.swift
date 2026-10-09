@@ -21,6 +21,7 @@ enum MenuBarStyle: String, CaseIterable, Identifiable, Equatable, Hashable {
     case squares
     case i3
     case i3Ordered
+    case i3OrderedByMonitor
     var id: String { rawValue }
     var title: String {
         switch self {
@@ -29,6 +30,7 @@ enum MenuBarStyle: String, CaseIterable, Identifiable, Equatable, Hashable {
             case .squares: "Square images"
             case .i3: "i3 style grouped"
             case .i3Ordered: "i3 style ordered"
+            case .i3OrderedByMonitor: "i3 style ordered, grouped by monitor"
         }
     }
 }

@@ -43,6 +43,7 @@ enum AxPermissionStatus: Equatable {
             default: ""
         }
         let hasFullscreenWindows = $0.allLeafWindowsRecursive.contains { $0.isFullscreen }
+        let monitorTopLeft = $0.workspaceMonitor.rect.topLeftCorner
         return WorkspaceViewModel(
             name: $0.name,
             suffix: suffix,
@@ -50,6 +51,7 @@ enum AxPermissionStatus: Equatable {
             isEffectivelyEmpty: $0.isEffectivelyEmpty,
             isVisible: $0.isVisible,
             hasFullscreenWindows: hasFullscreenWindows,
+            monitorIndex: sortedMonitors.firstIndex { $0.rect.topLeftCorner == monitorTopLeft } ?? 0,
         )
     }
     var items = sortedMonitors.map {
@@ -77,6 +79,8 @@ struct WorkspaceViewModel: Hashable {
     let isEffectivelyEmpty: Bool
     let isVisible: Bool
     let hasFullscreenWindows: Bool
+    /// Index of the workspace's monitor in `sortedMonitors` (left to right)
+    let monitorIndex: Int
 }
 
 enum TrayItemType: String, Hashable {

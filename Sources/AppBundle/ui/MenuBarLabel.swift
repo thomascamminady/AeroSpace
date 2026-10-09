@@ -13,6 +13,7 @@ struct MenuBarLabel: View {
     let itemSize = CGFloat(40)
     let itemBorderSize = CGFloat(3)
     let itemCornerRadius = CGFloat(6)
+    let monitorGroupSpacing = CGFloat(60)
 
     private var finalColor: Color {
         return color ?? (menuColorScheme == .dark ? Color.white : Color.black)
@@ -52,23 +53,41 @@ struct MenuBarLabel: View {
                         otherWorkspaces(with: workspaces)
                     }
                 case .i3Ordered:
-                    let modeItem = viewModel.trayItems.first { $0.type == .mode }
-                    if let modeItem {
-                        itemView(for: modeItem)
-                        modeSeparator(with: .monospaced)
-                    }
+                    modeItemWithSeparator
                     let orderedWorkspaces = viewModel.workspaces.filter { !$0.isEffectivelyEmpty || $0.isVisible }
-                    ForEach(orderedWorkspaces, id: \.name) { item in
-                        let trayItem = TrayItem(
-                            type: .workspace,
-                            name: item.name,
-                            isActive: item.isFocused,
-                            hasFullscreenWindows: item.hasFullscreenWindows,
-                        )
-                        itemView(for: trayItem)
-                            .opacity(item.isVisible ? 1 : 0.5)
+                    orderedWorkspaceItems(orderedWorkspaces)
+                case .i3OrderedByMonitor:
+                    modeItemWithSeparator
+                    let orderedWorkspaces = viewModel.workspaces.filter { !$0.isEffectivelyEmpty || $0.isVisible }
+                    let groups = Dictionary(grouping: orderedWorkspaces, by: \.monitorIndex).sorted { $0.key < $1.key }
+                    ForEach(Array(groups.enumerated()), id: \.element.key) { index, group in
+                        if index > 0 {
+                            Color.clear.frame(width: monitorGroupSpacing, height: 1)
+                        }
+                        orderedWorkspaceItems(group.value)
                     }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var modeItemWithSeparator: some View {
+        if let modeItem = viewModel.trayItems.first(where: { $0.type == .mode }) {
+            itemView(for: modeItem)
+            modeSeparator(with: .monospaced)
+        }
+    }
+
+    private func orderedWorkspaceItems(_ workspaces: [WorkspaceViewModel]) -> some View {
+        ForEach(workspaces, id: \.name) { item in
+            let trayItem = TrayItem(
+                type: .workspace,
+                name: item.name,
+                isActive: item.isFocused,
+                hasFullscreenWindows: item.hasFullscreenWindows,
+            )
+            itemView(for: trayItem)
+                .opacity(item.isVisible ? 1 : 0.5)
         }
     }
 
