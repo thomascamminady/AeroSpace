@@ -12,6 +12,8 @@ while test $# -gt 0; do
     esac
 done
 
+export AEROSPACE_MACOS_MIN_DEPLOYMENT_TARGET=13
+
 #############
 ### BUILD ###
 #############
