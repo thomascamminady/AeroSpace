@@ -86,7 +86,7 @@ struct MessageView: View {
         }
         .textSelection(.enabled)
         .frame(minWidth: 480, maxWidth: 960, minHeight: 200)
-        .onChange(of: model.message) { message in
+        .onChangeCompat(of: model.message) { message in
             if message == nil {
                 self.dismiss()
             }
@@ -97,6 +97,26 @@ struct MessageView: View {
         }
         .onAppear {
             focus = true
+        }
+    }
+}
+
+extension View {
+    @inlinable nonisolated public func onChangeCompat<V>(of value: V, perform action: @escaping (_ newValue: V) -> Void) -> some View where V: Equatable {
+        if #available(macOS 14, *) { // #macos14
+            return onChange(of: value) { old, new in action(new) }
+        } else {
+            return onChange(of: value, perform: action)
+        }
+    }
+}
+
+extension Scene {
+    @inlinable nonisolated public func onChangeCompat<V>(of value: V, perform action: @escaping (_ newValue: V) -> Void) -> some Scene where V: Equatable {
+        if #available(macOS 14, *) { // #macos14
+            return onChange(of: value) { old, new in action(new) }
+        } else {
+            return onChange(of: value, perform: action)
         }
     }
 }
